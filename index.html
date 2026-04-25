@@ -186,15 +186,10 @@
       background-position: center;
       background-size: cover;
       background-repeat: no-repeat;
-      opacity: 0;
-      transform: scale(1.04);
-      transition: opacity 1.2s ease, transform 6s ease;
-      z-index: -2;
-    }
-
-    .hero-slide.active {
       opacity: 1;
       transform: scale(1);
+      transition: opacity 1.2s ease, transform 6s ease;
+      z-index: -2;
     }
 
     .hero h2,
@@ -747,14 +742,7 @@
 </header>
 
 <div class="hero">
-  <div class="hero-slide active" style="background-image: url('store_image.JPG');"></div>
-  <div class="hero-slide" style="background-image: url('bag.JPG');"></div>
-  <div class="hero-slide" style="background-image: url('pic1.JPG');"></div>
-  <div class="hero-slide" style="background-image: url('pic2.JPG');"></div>
-  <div class="hero-slide" style="background-image: url('pic3.JPG');"></div>
-  <div class="hero-slide" style="background-image: url('pic4.JPG');"></div>
-  <div class="hero-slide" style="background-image: url('pic5.JPG');"></div>
-  <div class="hero-slide" style="background-image: url('pic6.JPG');"></div>
+  <div class="hero-slide" style="background-image: url('store_image.JPG');"></div>
   <h2>PUSH YOUR LIMITS</h2>
   <a class="btn" href="#contact">Join Now</a>
 </div>
@@ -992,13 +980,37 @@
     }
   });
 
-  const heroSlides = document.querySelectorAll('.hero-slide');
+  const heroSlide = document.querySelector('.hero-slide');
+  const heroImages = [
+    'store_image.JPG',
+    'bag.JPG',
+    'pic1.JPG',
+    'pic2.JPG',
+    'pic3.JPG',
+    'pic4.JPG',
+    'pic5.JPG',
+    'pic6.JPG'
+  ];
   let currentHeroSlide = 0;
 
+  const preloadHeroImage = (src) => {
+    const image = new Image();
+    image.src = src;
+  };
+
+  preloadHeroImage(heroImages[1]);
+
   setInterval(() => {
-    heroSlides[currentHeroSlide].classList.remove('active');
-    currentHeroSlide = (currentHeroSlide + 1) % heroSlides.length;
-    heroSlides[currentHeroSlide].classList.add('active');
+    currentHeroSlide = (currentHeroSlide + 1) % heroImages.length;
+    heroSlide.style.opacity = '0.88';
+    heroSlide.style.transform = 'scale(1.03)';
+
+    window.setTimeout(() => {
+      heroSlide.style.backgroundImage = `url('${heroImages[currentHeroSlide]}')`;
+      heroSlide.style.opacity = '1';
+      heroSlide.style.transform = 'scale(1)';
+      preloadHeroImage(heroImages[(currentHeroSlide + 1) % heroImages.length]);
+    }, 250);
   }, 4000);
 
   const classCards = document.querySelectorAll('.classes .card');
