@@ -1,0 +1,1038 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slipstream MMA</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #0f0f0f;
+      color: white;
+    }
+
+    header {
+      background: black;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      min-width: 0;
+    }
+
+    .logo {
+      display: block;
+      width: clamp(92px, 14vw, 160px);
+      height: auto;
+      object-fit: contain;
+    }
+
+    .nav-shell {
+      position: relative;
+      margin-left: auto;
+    }
+
+    .nav-toggle {
+      width: 52px;
+      height: 52px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #131313;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+      transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .nav-toggle:hover,
+    .nav-toggle:focus-visible,
+    .nav-shell.open .nav-toggle {
+      background: #1a1a1a;
+      border-color: rgba(255, 42, 42, 0.65);
+      transform: translateY(-1px);
+      outline: none;
+    }
+
+    .nav-toggle-bar {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: white;
+      border-radius: 999px;
+      position: relative;
+      transition: background 0.2s ease;
+    }
+
+    .nav-toggle-bar::before,
+    .nav-toggle-bar::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      width: 22px;
+      height: 2px;
+      background: white;
+      border-radius: 999px;
+    }
+
+    .nav-toggle-bar::before {
+      top: -7px;
+    }
+
+    .nav-toggle-bar::after {
+      top: 7px;
+    }
+
+    nav {
+      position: absolute;
+      top: calc(100% + 12px);
+      right: 0;
+      min-width: min(86vw, 280px);
+      display: none;
+      flex-direction: column;
+      gap: 0;
+      padding: 10px;
+      background: rgba(10, 10, 10, 0.96);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      box-shadow: 0 22px 42px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(10px);
+    }
+
+    .nav-shell.open nav {
+      display: flex;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 0.96rem;
+      white-space: nowrap;
+      position: relative;
+      padding: 12px 14px;
+      border-radius: 8px;
+      transition: color 0.25s ease, transform 0.25s ease;
+    }
+
+    nav a::after {
+      content: "";
+      position: absolute;
+      left: 14px;
+      bottom: 7px;
+      width: calc(100% - 28px);
+      height: 2px;
+      background: red;
+      transform: scaleX(0);
+      transform-origin: right;
+      transition: transform 0.25s ease;
+    }
+
+    nav a:hover,
+    nav a:focus-visible {
+      color: #ff2a2a;
+      transform: translateY(-2px);
+    }
+
+    nav a:hover::after,
+    nav a:focus-visible::after {
+      transform: scaleX(1);
+      transform-origin: left;
+    }
+
+    .hero {
+      min-height: 88vh;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 80px 15px;
+      isolation: isolate;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.58));
+      z-index: -1;
+    }
+
+    .hero-slide {
+      position: absolute;
+      inset: 0;
+      background-position: center;
+      background-size: cover;
+      background-repeat: no-repeat;
+      opacity: 0;
+      transform: scale(1.04);
+      transition: opacity 1.2s ease, transform 6s ease;
+      z-index: -2;
+    }
+
+    .hero-slide.active {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .hero h2,
+    .hero .btn {
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero h2 {
+      font-size: clamp(2rem, 7vw, 4.25rem);
+      line-height: 1.05;
+      margin: 0 0 20px;
+      max-width: 900px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 150px;
+      min-height: 48px;
+      padding: 14px 28px;
+      background: linear-gradient(135deg, #ff1e1e, #b80000);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: white;
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.95rem;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 8px;
+      box-shadow: 0 14px 34px rgba(255, 0, 0, 0.32);
+      position: relative;
+      overflow: hidden;
+      animation: ctaPulse 2.6s ease-in-out infinite;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .btn::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -80%;
+      width: 45%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+      transform: skewX(-20deg);
+      animation: ctaShine 3.2s ease-in-out infinite;
+    }
+
+    .btn:hover,
+    .btn:focus-visible {
+      animation: none;
+      transform: translateY(-3px) scale(1.03);
+      box-shadow: 0 18px 42px rgba(255, 0, 0, 0.42);
+    }
+
+    @keyframes ctaPulse {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.04);
+      }
+    }
+
+    @keyframes ctaShine {
+      0%, 45% {
+        left: -80%;
+      }
+      70%, 100% {
+        left: 135%;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .btn,
+      .btn::before,
+      .hero-slide {
+        animation: none;
+        transition: none;
+      }
+    }
+
+    section {
+      padding: 70px 15px;
+      text-align: center;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    section:nth-of-type(even) {
+      background: #141414;
+    }
+
+    section h2 {
+      font-size: 1.6rem;
+      margin-bottom: 20px;
+    }
+
+    #contact a {
+      color: white;
+      font-weight: bold;
+    }
+
+    .contact-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    .contact-actions .btn {
+      min-width: 140px;
+      min-height: 46px;
+      font-size: 0.85rem;
+      animation-duration: 3.1s;
+    }
+
+    .classes {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 15px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: linear-gradient(145deg, #1d1d1d, #111);
+      padding: 22px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      color: white;
+      text-align: left;
+      cursor: pointer;
+      min-height: 168px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255, 0, 0, 0.18), transparent 55%);
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    .card h3,
+    .card p {
+      position: relative;
+      z-index: 1;
+    }
+
+    .card h3 {
+      margin-top: 0;
+      color: #ff2a2a;
+    }
+
+    .card:hover,
+    .card:focus-visible,
+    .card.active {
+      transform: translateY(-6px);
+      border-color: rgba(255, 42, 42, 0.75);
+      box-shadow: 0 18px 34px rgba(0, 0, 0, 0.35);
+      outline: none;
+    }
+
+    .card:hover::before,
+    .card:focus-visible::before,
+    .card.active::before {
+      opacity: 1;
+    }
+
+    .class-detail {
+      max-width: 900px;
+      margin: 24px auto 0;
+      padding: 22px;
+      background: #111;
+      border-left: 4px solid red;
+      border-radius: 8px;
+      text-align: left;
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.28);
+    }
+
+    .class-detail h3 {
+      margin: 0 0 8px;
+      color: #ff2a2a;
+    }
+
+    .class-detail p {
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    .about-wrap {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 28px;
+      align-items: center;
+      max-width: 1100px;
+      margin: 0 auto;
+      text-align: left;
+    }
+
+    .coach-photo {
+      width: min(100%, 430px);
+      aspect-ratio: 4 / 5;
+      object-fit: cover;
+      object-position: center top;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 18px 44px rgba(0, 0, 0, 0.42);
+      justify-self: center;
+    }
+
+    .about-content {
+      padding: clamp(22px, 4vw, 34px);
+      background: #101010;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-left: 4px solid red;
+      border-radius: 8px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+    }
+
+    .about-content h3 {
+      color: #ff2a2a;
+      font-size: clamp(1.5rem, 4vw, 2.35rem);
+      margin: 0 0 14px;
+    }
+
+    .about-content p {
+      color: #f0f0f0;
+      line-height: 1.7;
+      margin: 0 0 16px;
+    }
+
+    .coach-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .coach-badges span {
+      background: #181818;
+      border: 1px solid rgba(255, 42, 42, 0.45);
+      border-radius: 999px;
+      color: white;
+      font-size: 0.82rem;
+      font-weight: bold;
+      padding: 9px 12px;
+    }
+
+    .schedule-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .schedule-day {
+      background: linear-gradient(145deg, #171717, #0f0f0f);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 20px;
+      text-align: left;
+      box-shadow: 0 16px 34px rgba(0, 0, 0, 0.24);
+    }
+
+    .schedule-day h3 {
+      margin: 0 0 14px;
+      color: #ff2a2a;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .schedule-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .schedule-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: flex-start;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .schedule-item:last-child {
+      padding-bottom: 0;
+      border-bottom: 0;
+    }
+
+    .schedule-class {
+      display: block;
+      color: white;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .schedule-time {
+      color: #d8d8d8;
+      font-size: 0.92rem;
+      white-space: nowrap;
+    }
+
+    .schedule-appointed {
+      color: #bdbdbd;
+      font-style: italic;
+    }
+
+    .pricing-intro {
+      max-width: 760px;
+      margin: 0 auto 24px;
+      color: #e8e8e8;
+      line-height: 1.6;
+    }
+
+    .pricing-offer {
+      max-width: 980px;
+      margin: 0 auto 24px;
+      padding: 24px;
+      background: linear-gradient(135deg, #ff1e1e, #7a0000);
+      border-radius: 8px;
+      box-shadow: 0 18px 42px rgba(255, 0, 0, 0.25);
+    }
+
+    .pricing-offer strong {
+      display: block;
+      font-size: clamp(1.6rem, 4vw, 2.7rem);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .location-wrap {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+      max-width: 1100px;
+      margin: 0 auto;
+      text-align: left;
+    }
+
+    .location-card,
+    .map-card {
+      background: #111;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 24px;
+      box-shadow: 0 16px 34px rgba(0, 0, 0, 0.24);
+    }
+
+    .location-card h3,
+    .map-card h3 {
+      margin-top: 0;
+      color: #ff2a2a;
+    }
+
+    .location-card p {
+      color: #e8e8e8;
+      line-height: 1.7;
+      margin-bottom: 18px;
+    }
+
+    .location-address {
+      font-style: normal;
+      line-height: 1.7;
+      color: white;
+      margin-bottom: 18px;
+    }
+
+    .map-frame {
+      width: 100%;
+      min-height: 360px;
+      border: 0;
+      border-radius: 8px;
+      background: #0f0f0f;
+    }
+
+    .price-card {
+      background: #141414;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 24px;
+      text-align: left;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .price-card.featured {
+      border-color: rgba(255, 42, 42, 0.8);
+      background: linear-gradient(145deg, #1c1c1c, #101010);
+      box-shadow: 0 18px 38px rgba(0, 0, 0, 0.32);
+    }
+
+    .price-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(255, 42, 42, 0.65);
+    }
+
+    .price-tag {
+      color: #ff2a2a;
+      font-size: 2rem;
+      font-weight: bold;
+      margin: 12px 0;
+    }
+
+    .price-card ul {
+      padding-left: 18px;
+      line-height: 1.8;
+    }
+
+    .badge {
+      display: inline-block;
+      background: red;
+      color: white;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    footer {
+      background: black;
+      padding: 20px;
+      text-align: center;
+      font-size: 0.8rem;
+    }
+
+    @media (max-width: 599px) {
+      header {
+        padding: 10px 12px;
+        gap: 10px;
+      }
+
+      .logo {
+        width: min(28vw, 110px);
+      }
+
+    }
+
+    @media (min-width: 600px) {
+      .classes {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 900px) {
+      header {
+        padding: 14px 32px;
+      }
+
+      .nav-shell {
+        display: flex;
+        align-items: center;
+      }
+
+      .nav-toggle {
+        display: none;
+      }
+
+      nav {
+        position: static;
+        min-width: 0;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-end;
+        gap: clamp(6px, 1vw, 14px);
+        padding: 0;
+        background: transparent;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+        backdrop-filter: none;
+      }
+
+      nav a {
+        font-size: 0.84rem;
+        padding: 8px 10px;
+      }
+
+      nav a::after {
+        left: 10px;
+        bottom: 4px;
+        width: calc(100% - 20px);
+      }
+
+      .hero {
+        min-height: 100vh;
+      }
+
+      .classes,
+      .schedule-grid,
+      .pricing-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .location-wrap {
+        grid-template-columns: 0.9fr 1.1fr;
+      }
+
+      .about-wrap {
+        grid-template-columns: 0.85fr 1.15fr;
+      }
+
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <img src="slipstream-logo.png" alt="Slipstream Logo" class="logo">
+  </div>
+  <div class="nav-shell">
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-label="Open navigation menu">
+      <span class="nav-toggle-bar"></span>
+    </button>
+    <nav>
+      <a href="#">Home</a>
+      <a href="#classes">Classes</a>
+      <a href="#schedule">Schedule</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#location">Location</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+      <a href="https://www.instagram.com/slipstreamma/">Instagram</a>
+    </nav>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-slide active" style="background-image: url('store_image.JPG');"></div>
+  <div class="hero-slide" style="background-image: url('bag.JPG');"></div>
+  <div class="hero-slide" style="background-image: url('pic1.JPG');"></div>
+  <div class="hero-slide" style="background-image: url('pic2.JPG');"></div>
+  <div class="hero-slide" style="background-image: url('pic3.JPG');"></div>
+  <div class="hero-slide" style="background-image: url('pic4.JPG');"></div>
+  <div class="hero-slide" style="background-image: url('pic5.JPG');"></div>
+  <div class="hero-slide" style="background-image: url('pic6.JPG');"></div>
+  <h2>PUSH YOUR LIMITS</h2>
+  <a class="btn" href="#contact">Join Now</a>
+</div>
+
+<section id="classes">
+  <h2>Our Classes</h2>
+  <div class="classes">
+    <button class="card active" type="button" data-title="Boxing" data-detail="Build sharp hands, footwork, defence, and fight confidence with practical boxing drills for all levels.">
+      <h3>Boxing</h3>
+      <p>Build sharp hands, footwork, defence, and fight confidence.</p>
+    </button>
+    <button class="card" type="button" data-title="Kickboxing" data-detail="Develop powerful striking with punches, kicks, movement, combinations, and conditioning built for real performance.">
+      <h3>Kickboxing</h3>
+      <p>Develop powerful striking with punches, kicks, movement, and conditioning.</p>
+    </button>
+    <button class="card" type="button" data-title="Muay Thai" data-detail="Train elbows, knees, clinch work, kicks, balance, and full-body toughness in a high-energy striking class.">
+      <h3>Muay Thai</h3>
+      <p>Train elbows, knees, clinch work, kicks, and full-body toughness.</p>
+    </button>
+    <button class="card" type="button" data-title="Wrestling &amp; Grappling" data-detail="Learn takedowns, control, escapes, pressure, and ground-based combat skills for MMA and self-defence.">
+      <h3>Wrestling &amp; Grappling</h3>
+      <p>Learn takedowns, control, escapes, and ground-based combat skills.</p>
+    </button>
+    <button class="card" type="button" data-title="Personal Fitness" data-detail="One-on-one fitness training built around your goals, with strength, stamina, mobility, and accountability.">
+      <h3>Personal Fitness</h3>
+      <p>One-on-one fitness training built around strength, stamina, and goals.</p>
+    </button>
+    <button class="card" type="button" data-title="Stick-Fighting" data-detail="Practice timing, coordination, distance, defence, and practical weapon movement in a focused skills class.">
+      <h3>Stick-Fighting</h3>
+      <p>Practice timing, coordination, defence, and practical weapon movement.</p>
+    </button>
+  </div>
+  <div class="class-detail" aria-live="polite">
+    <h3 id="class-detail-title">Boxing</h3>
+    <p id="class-detail-text">Build sharp hands, footwork, defence, and fight confidence with practical boxing drills for all levels.</p>
+  </div>
+</section>
+<section id="schedule">
+  <h2>Schedule</h2>
+  <div class="schedule-grid">
+    <div class="schedule-day">
+      <h3>Monday</h3>
+      <div class="schedule-list">
+        <div class="schedule-item">
+          <span class="schedule-appointed">By appointment</span>
+          <span class="schedule-time schedule-appointed">Flexible</span>
+        </div>
+      </div>
+    </div>
+    <div class="schedule-day">
+      <h3>Tuesday</h3>
+      <div class="schedule-list">
+        <div class="schedule-item">
+          <div>
+            <span class="schedule-class">Boxing</span>
+          </div>
+          <span class="schedule-time">4:00pm - 6:00pm</span>
+        </div>
+      </div>
+    </div>
+    <div class="schedule-day">
+      <h3>Wednesday</h3>
+      <div class="schedule-list">
+        <div class="schedule-item">
+          <span class="schedule-appointed">By appointment</span>
+          <span class="schedule-time schedule-appointed">Flexible</span>
+        </div>
+      </div>
+    </div>
+    <div class="schedule-day">
+      <h3>Thursday</h3>
+      <div class="schedule-list">
+        <div class="schedule-item">
+          <div>
+            <span class="schedule-class">Boxing</span>
+          </div>
+          <span class="schedule-time">4:00pm - 6:00pm</span>
+        </div>
+      </div>
+    </div>
+    <div class="schedule-day">
+      <h3>Friday</h3>
+      <div class="schedule-list">
+        <div class="schedule-item">
+          <span class="schedule-appointed">By appointment</span>
+          <span class="schedule-time schedule-appointed">Flexible</span>
+        </div>
+      </div>
+    </div>
+    <div class="schedule-day">
+      <h3>Saturday</h3>
+      <div class="schedule-list">
+        <div class="schedule-item">
+          <span class="schedule-appointed">By appointment</span>
+          <span class="schedule-time schedule-appointed">Flexible</span>
+        </div>
+      </div>
+    </div>
+    <div class="schedule-day">
+      <h3>Sunday</h3>
+      <div class="schedule-list">
+        <div class="schedule-item">
+          <span class="schedule-appointed">By appointment</span>
+          <span class="schedule-time schedule-appointed">Flexible</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="about">
+  <h2>About John</h2>
+  <div class="about-wrap">
+    <img src="john.png" alt="John from Slipstream Martial Arts" class="coach-photo">
+    <div class="about-content">
+      <h3>Certified coaching with a reputation built on trust.</h3>
+      <p>John brings a calm, disciplined, and highly practical approach to every session at Slipstream Martial Arts. He is a certified coach who works alongside the Combat Sports Association, helping students train with structure, safety, and real purpose.</p>
+      <p>His reputation comes from the way he carries himself: professional, approachable, and committed to getting the best out of every student, whether they are stepping into combat sports for the first time or sharpening serious fight skills.</p>
+      <p>At Slipstream, John focuses on strong fundamentals, respectful training culture, and steady progress. The goal is simple: help people become fitter, tougher, more confident, and better prepared.</p>
+      <div class="coach-badges">
+        <span>Certified Coach</span>
+        <span>Combat Sports Association</span>
+        <span>Beginner Friendly</span>
+        <span>Real Skill Development</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="pricing">
+  <h2>Pricing</h2>
+  <p class="pricing-intro">Start with a free week, train across the classes that suit you, and decide after you have felt the energy on the mats.</p>
+  <div class="pricing-offer">
+    <strong>Free Week Trial</strong>
+    <p>No pressure. No guesswork. Come in, train, meet the coaches, and see why Slipstream fits before you join.</p>
+    <a class="btn" href="sms:0418282823">Claim Free Week</a>
+  </div>
+  <div class="pricing-grid">
+    <div class="price-card">
+      <h3>Starter</h3>
+      <div class="price-tag">$29/week</div>
+      <p>Perfect for building routine and getting started.</p>
+      <ul>
+        <li>2 classes per week</li>
+        <li>Free week trial included</li>
+        <li>Beginner friendly coaching</li>
+      </ul>
+    </div>
+    <div class="price-card featured">
+      <span class="badge">Best Value</span>
+      <h3>Unlimited Training</h3>
+      <div class="price-tag">$49/week</div>
+      <p>For members who want the full Slipstream experience.</p>
+      <ul>
+        <li>Unlimited weekly classes</li>
+        <li>Boxing, kickboxing, Muay Thai, grappling, fitness, and stick-fighting</li>
+        <li>Free week trial included</li>
+      </ul>
+    </div>
+    <div class="price-card">
+      <h3>Personal Coaching</h3>
+      <div class="price-tag">From $70</div>
+      <p>Focused one-on-one training built around your goals.</p>
+      <ul>
+        <li>Private coaching sessions</li>
+        <li>Fitness, striking, or skill focus</li>
+        <li>Message to book a time</li>
+      </ul>
+    </div>
+  </div>
+</section>
+<section id="location">
+  <h2>Location</h2>
+  <div class="location-wrap">
+    <div class="location-card">
+      <h3>SlipStream Martial Arts</h3>
+      <p>Train with us in Campsie at our Canterbury Road location. It is a straightforward spot for trial sessions, weekly training, and private coaching.</p>
+      <address class="location-address">
+        SlipStream Martial Arts<br>
+        420 Canterbury Rd<br>
+        Campsie NSW 2194
+      </address>
+      <a class="btn" href="https://www.google.com/maps/search/?api=1&query=SlipStream+Martial+Arts,+420+Canterbury+Rd,+Campsie+NSW+2194">Open in Google Maps</a>
+    </div>
+    <div class="map-card">
+      <h3>Map View</h3>
+      <iframe
+        class="map-frame"
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        src="https://www.google.com/maps?q=SlipStream%20Martial%20Arts%2C%20420%20Canterbury%20Rd%2C%20Campsie%20NSW%202194&z=16&output=embed"
+        title="Map showing SlipStream Martial Arts in Campsie">
+      </iframe>
+    </div>
+  </div>
+</section>
+<section id="contact">
+  <h2>Contact</h2>
+  <p>Message: <a href="sms:0418282823">0418 282 823</a></p>
+  <p>Phone: <a href="tel:0418282823">0418 282 823</a></p>
+  <p>Instagram: <a href="https://www.instagram.com/slipstreamma/">@slipstreamma</a></p>
+  <div class="contact-actions">
+    <a class="btn" href="tel:0418282823">Call Now</a>
+    <a class="btn" href="sms:0418282823">Message to Join</a>
+    <a class="btn" href="https://www.instagram.com/slipstreamma/">View Instagram</a>
+  </div>
+</section>
+
+<footer>
+  <p>&copy; 2026 Slipstream MMA</p>
+</footer>
+
+
+<script>
+  const navShell = document.querySelector('.nav-shell');
+  const navToggle = document.querySelector('.nav-toggle');
+  const navLinks = document.querySelectorAll('.nav-shell nav a');
+
+  navToggle.addEventListener('click', () => {
+    const isOpen = navShell.classList.toggle('open');
+    navToggle.setAttribute('aria-expanded', String(isOpen));
+  });
+
+  navLinks.forEach((link) => {
+    link.addEventListener('click', () => {
+      navShell.classList.remove('open');
+      navToggle.setAttribute('aria-expanded', 'false');
+    });
+  });
+
+  document.addEventListener('click', (event) => {
+    if (!navShell.contains(event.target)) {
+      navShell.classList.remove('open');
+      navToggle.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  const heroSlides = document.querySelectorAll('.hero-slide');
+  let currentHeroSlide = 0;
+
+  setInterval(() => {
+    heroSlides[currentHeroSlide].classList.remove('active');
+    currentHeroSlide = (currentHeroSlide + 1) % heroSlides.length;
+    heroSlides[currentHeroSlide].classList.add('active');
+  }, 4000);
+
+  const classCards = document.querySelectorAll('.classes .card');
+  const classDetailTitle = document.getElementById('class-detail-title');
+  const classDetailText = document.getElementById('class-detail-text');
+
+  classCards.forEach((card) => {
+    card.addEventListener('click', () => {
+      classCards.forEach((item) => item.classList.remove('active'));
+      card.classList.add('active');
+      classDetailTitle.innerHTML = card.dataset.title;
+      classDetailText.textContent = card.dataset.detail;
+    });
+  });
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
